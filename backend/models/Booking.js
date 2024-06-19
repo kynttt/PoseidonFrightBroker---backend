@@ -11,7 +11,7 @@ const BookingSchema = new mongoose.Schema({
   distance: { type: Number, required: true },
   status: { type: String, default: 'Pending' },
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  updatedAt: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model('Booking', BookingSchema);
