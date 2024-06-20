@@ -3,8 +3,8 @@ const router = express.Router();
 const truckController = require('../controllers/truckController');
 const { authenticateJWT, authorizeRole, errorHandler } = require('../middlewares');
 
-router.post('/', authenticateJWT, authorizeRole('admin'), truckController.addTruck);
-router.get('/', authenticateJWT, truckController.getTrucks);
+router.post('/addTruck', authenticateJWT, authorizeRole('admin'), truckController.addTruck);
+router.get('/trucks', authenticateJWT, truckController.getTrucks);
 router.get('/:id', authenticateJWT, truckController.getTruck);
 router.put('/:id', authenticateJWT, authorizeRole('admin'), truckController.updateTruck);
 router.delete('/:id', authenticateJWT, authorizeRole('admin'), truckController.deleteTruck);
