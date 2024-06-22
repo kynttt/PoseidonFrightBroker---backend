@@ -11,14 +11,14 @@ const authenticateJWT = (req, res, next) => {
     token = req.header('x-auth-token');
   }
 
-  // console.log('Token:', token);
-
   if (!token) {
     return res.status(401).json({ msg: 'No token, authorization denied' });
   }
 
   try {
+    console.log('JWT_SECRET during verification:', process.env.JWT_SECRET);
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Decoded Token:', decoded);
     req.user = decoded.user;
     next();
   } catch (err) {
@@ -27,21 +27,18 @@ const authenticateJWT = (req, res, next) => {
   }
 };
 
-module.exports = {
-  authenticateJWT,
-};
-
 // Middleware to authorize user roles
 const authorizeRole = (role) => {
   return (req, res, next) => {
+    console.log('User Role:', req.user.role);
+    console.log('Expected Role:', role);
     if (req.user && req.user.role === role) {
       next();
     } else {
-      res.status(403).json({ msg: 'Access denied' });
+      res.status(403).json({ msg: 'Access denied: Insufficient role' });
     }
   };
 };
-
 
 // Middleware to handle errors
 const errorHandler = (err, req, res, next) => {

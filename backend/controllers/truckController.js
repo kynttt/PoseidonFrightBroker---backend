@@ -4,7 +4,7 @@ const Truck = require('../models/Truck');
 // @route   POST /api/trucks
 // @access  Public (can be modified based on your application's needs)
 exports.addTruck = async (req, res) => {
-  const { licensePlate, model, capacity, status } = req.body;
+  const { licensePlate, model, capacity, status, type, rate, carrier } = req.body;
 
   try {
     // Check if truck with the same license plate already exists
@@ -19,14 +19,21 @@ exports.addTruck = async (req, res) => {
       model,
       capacity,
       status: status || 'Available', // Default to 'Available' if status is not provided
+      type,
+      rate,
+      carrier
     });
 
     // Save truck to database
     await newTruck.save();
 
-    res.json(newTruck); // Respond with the newly created truck object
+    res.status(201).json(newTruck); // Respond with the newly created truck object
   } catch (err) {
     console.error(err.message);
+    if (err.name === 'ValidationError') {
+      // Mongoose validation error
+      return res.status(400).json({ error: err.message });
+    }
     res.status(500).send('Server Error');
   }
 };

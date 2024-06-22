@@ -3,10 +3,10 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 exports.register = async (req, res) => {
-  const { name, email, password, phone } = req.body;
+  const { name, email, password, phone, role } = req.body;
 
   try {
-    if (!name || !email || !password || !phone) {
+    if (!name || !email || !password || !phone ) {
       return res.status(400).json({ msg: 'Please enter all fields' });
     }
 
@@ -15,7 +15,7 @@ exports.register = async (req, res) => {
       return res.status(400).json({ msg: 'User already exists' });
     }
 
-    user = new User({ name, email, password, phone });
+    user = new User({ name, email, password, phone, role });
 
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
@@ -37,21 +37,24 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    if (!email || !password) {
-      return res.status(400).json({ msg: 'Please enter all fields' });
-    }
-
     let user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ msg: 'User does not exist' });
+      return res.status(400).json({ msg: 'Invalid Credentials' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ msg: 'Invalid credentials' });
+      return res.status(400).json({ msg: 'Invalid Credentials' });
     }
 
+    // Log the user data
+    console.log('User found during login:', user);
+
     const payload = { user: { id: user.id, role: user.role } };
+
+    // Log the payload being used for token generation
+    console.log('Payload for JWT:', payload);
+
     jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
       if (err) throw err;
       res.json({ token });
@@ -64,14 +67,16 @@ exports.login = async (req, res) => {
 
 //get Users
 exports.getUsers = async (req, res) => {
-    try {
-      const users = await User.find();
-      res.json(users);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server Error');
-    }
-  };
+  console.log('Request User:', req.user);
+  
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
 
 //get one User
 exports.getUser = async (req, res) => {
