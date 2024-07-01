@@ -27,18 +27,20 @@ const authenticateJWT = (req, res, next) => {
   }
 };
 
-// Middleware to authorize user roles
-const authorizeRole = (role) => {
+
+// Middleware to authorize user roles based on isAdmin
+const authorizeRole = (isAdmin) => {
   return (req, res, next) => {
-    console.log('User Role:', req.user.role);
-    console.log('Expected Role:', role);
-    if (req.user && req.user.role === role) {
+    console.log('User isAdmin:', req.user.isAdmin);
+    console.log('Expected isAdmin:', isAdmin);
+    if (req.user && req.user.isAdmin === isAdmin) {
       next();
     } else {
-      res.status(403).json({ msg: 'Access denied: Insufficient role' });
+      res.status(403).json({ msg: 'Access denied: Insufficient permissions' });
     }
   };
 };
+
 
 // Middleware to handle errors
 const errorHandler = (err, req, res, next) => {

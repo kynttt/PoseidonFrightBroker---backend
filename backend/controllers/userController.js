@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 exports.register = async (req, res) => {
-  const { name, email, password, phone, address, postalCode, companyName, role } = req.body;
+  const { name, email, password, phone, address, postalCode, companyName, isAdmin } = req.body;
 
   try {
     // Validate required fields
@@ -26,7 +26,7 @@ exports.register = async (req, res) => {
       address,
       postalCode,
       companyName: companyName || '', // Set default if not provided
-      role: role || 'user', // Set default role if not provided
+      isAdmin: isAdmin || false, // Set isAdmin based on request or default to false
     });
 
     // Hash the password
@@ -37,7 +37,7 @@ exports.register = async (req, res) => {
     await user.save();
 
     // Generate JWT token
-    const payload = { user: { id: user.id, role: user.role } };
+    const payload = { user: { id: user.id, isAdmin: user.isAdmin } };
     jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
       if (err) throw err;
       res.json({ token });
@@ -66,7 +66,7 @@ exports.login = async (req, res) => {
     // Log the user data
     console.log('User found during login:', user);
 
-    const payload = { user: { id: user.id, role: user.role } };
+    const payload = { user: { id: user.id, isAdmin: user.isAdmin } };
 
     // Log the payload being used for token generation
     console.log('Payload for JWT:', payload);
@@ -81,7 +81,8 @@ exports.login = async (req, res) => {
   }
 };
 
-//get Users
+
+// Get all users
 exports.getUsers = async (req, res) => {
   console.log('Request User:', req.user);
   
@@ -93,6 +94,7 @@ exports.getUsers = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+
 
 //get one User
 exports.getUser = async (req, res) => {

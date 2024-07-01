@@ -8,7 +8,7 @@ const UserSchema = new mongoose.Schema({
   address: { type: String, required: true },
   postalCode: { type: String, required: true },
   companyName: { type: String, default: '' },
-  role: { type: String, default: 'user' },
+  isAdmin: { type: Boolean, default: false }, // Ensure isAdmin field is defined
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
