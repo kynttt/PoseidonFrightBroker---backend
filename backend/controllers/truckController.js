@@ -20,6 +20,7 @@ exports.addTruck = async (req, res) => {
       capacity,
       status: status || 'Available', // Default to 'Available' if status is not provided
       type,
+      size,
       rate,
       carrier
     });

@@ -8,12 +8,30 @@ const carrierRoutes = require('./routes/carrierRoutes');
 const shipperRoutes = require('./routes/shipperRoutes');
 const freightQuoteRoutes = require('./routes/freightQuoteRoutes');
 const shipmentRoutes = require('./routes/shipmentRoutes');
+const cors = require('cors');
+
 
 const connectDB = require('./config/db');
 
 const app = express();
+app.use(cors());
 
 require('dotenv').config();
+
+
+const mongoose = require('mongoose');
+
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('MongoDB connected'))
+.catch(err => {
+  console.error('MongoDB connection error:', err);
+  process.exit(1); // Exit process on connection failure
+});
 
 // Connect Database
 connectDB();
@@ -24,8 +42,6 @@ app.use(express.json({ extended: false }));
 // Use Helmet to secure Express headers
 app.use(helmet());
 
-// Use JSON parser middleware
-app.use(express.json());
 
 // Routes
 app.use('/api/users', userRoutes);
@@ -38,10 +54,19 @@ app.use('/api/freight-quotes', freightQuoteRoutes);
 app.use('/api/shipments', shipmentRoutes);
 
 // Error handling middleware
+// Improved error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ msg: 'An unexpected error occurred' });
+
+  if (err instanceof mongoose.Error.ValidationError) {
+    res.status(400).json({ msg: err.message });
+  } else if (err instanceof mongoose.Error.CastError) {
+    res.status(400).json({ msg: 'Invalid ID' });
+  } else {
+    res.status(500).json({ msg: 'An unexpected error occurred' });
+  }
 });
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

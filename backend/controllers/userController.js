@@ -3,25 +3,40 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 exports.register = async (req, res) => {
-  const { name, email, password, phone, role } = req.body;
+  const { name, email, password, phone, address, postalCode, companyName, role } = req.body;
 
   try {
-    if (!name || !email || !password || !phone ) {
-      return res.status(400).json({ msg: 'Please enter all fields' });
+    // Validate required fields
+    if (!name || !email || !password || !phone || !address || !postalCode) {
+      return res.status(400).json({ msg: 'Please enter all required fields' });
     }
 
+    // Check if user already exists
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({ msg: 'User already exists' });
     }
 
-    user = new User({ name, email, password, phone, role });
+    // Create new user instance
+    user = new User({
+      name,
+      email,
+      password,
+      phone,
+      address,
+      postalCode,
+      companyName: companyName || '', // Set default if not provided
+      role: role || 'user', // Set default role if not provided
+    });
 
+    // Hash the password
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
 
+    // Save user to database
     await user.save();
 
+    // Generate JWT token
     const payload = { user: { id: user.id, role: user.role } };
     jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
       if (err) throw err;
@@ -32,6 +47,7 @@ exports.register = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
