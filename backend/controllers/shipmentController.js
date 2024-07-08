@@ -1,9 +1,21 @@
 const Shipment = require('../models/Shipment');
 
-// Get all shipments
-exports.getAllShipments = async (req, res) => {
+exports.createShipment = async (req, res) => {
+  const { quoteId, status, trackingNumber } = req.body;
+
   try {
-    const shipments = await Shipment.find();
+    const shipment = new Shipment({ quoteId, status, trackingNumber });
+    await shipment.save();
+    res.json(shipment);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+exports.getShipments = async (req, res) => {
+  try {
+    const shipments = await Shipment.find().populate('quoteId');
     res.json(shipments);
   } catch (err) {
     console.error(err.message);
@@ -11,10 +23,9 @@ exports.getAllShipments = async (req, res) => {
   }
 };
 
-// Get shipment by ID
-exports.getShipmentById = async (req, res) => {
+exports.getShipment = async (req, res) => {
   try {
-    const shipment = await Shipment.findById(req.params.id);
+    const shipment = await Shipment.findById(req.params.id).populate('quoteId');
     if (!shipment) {
       return res.status(404).json({ msg: 'Shipment not found' });
     }
@@ -25,76 +36,33 @@ exports.getShipmentById = async (req, res) => {
   }
 };
 
-// Create a new shipment
-exports.createShipment = async (req, res) => {
-  const { shipper, carrier, truck, origin, destination, cargoDetails, weight, volume, pickupDate, deliveryDate, status, freightQuote } = req.body;
-
-  try {
-    const newShipment = new Shipment({
-      shipper,
-      carrier,
-      truck,
-      origin,
-      destination,
-      cargoDetails,
-      weight,
-      volume,
-      pickupDate,
-      deliveryDate,
-      status,
-      freightQuote
-    });
-
-    await newShipment.save();
-    res.json(newShipment);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
-  }
-};
-
-// Update an existing shipment
 exports.updateShipment = async (req, res) => {
-  const { shipper, carrier, truck, origin, destination, cargoDetails, weight, volume, pickupDate, deliveryDate, status, freightQuote } = req.body;
+  const { status, trackingNumber } = req.body;
+
+  const shipmentFields = { status, trackingNumber };
 
   try {
-    let updatedShipment = await Shipment.findById(req.params.id);
-
-    if (!updatedShipment) {
-      return res.status(404).json({ msg: 'Shipment not found' });
-    }
-
-    updatedShipment.shipper = shipper;
-    updatedShipment.carrier = carrier;
-    updatedShipment.truck = truck;
-    updatedShipment.origin = origin;
-    updatedShipment.destination = destination;
-    updatedShipment.cargoDetails = cargoDetails;
-    updatedShipment.weight = weight;
-    updatedShipment.volume = volume;
-    updatedShipment.pickupDate = pickupDate;
-    updatedShipment.deliveryDate = deliveryDate;
-    updatedShipment.status = status;
-    updatedShipment.freightQuote = freightQuote;
-
-    await updatedShipment.save();
-    res.json(updatedShipment);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
-  }
-};
-
-// Delete a shipment
-exports.deleteShipment = async (req, res) => {
-  try {
-    const shipment = await Shipment.findById(req.params.id);
-
+    let shipment = await Shipment.findById(req.params.id);
     if (!shipment) {
       return res.status(404).json({ msg: 'Shipment not found' });
     }
 
-    await shipment.deleteOne();
+    shipment = await Shipment.findByIdAndUpdate(req.params.id, { $set: shipmentFields }, { new: true });
+    res.json(shipment);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+exports.deleteShipment = async (req, res) => {
+  try {
+    let shipment = await Shipment.findById(req.params.id);
+    if (!shipment) {
+      return res.status(404).json({ msg: 'Shipment not found' });
+    }
+
+    await Shipment.findByIdAndDelete(req.params.id);
     res.json({ msg: 'Shipment removed' });
   } catch (err) {
     console.error(err.message);

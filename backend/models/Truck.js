@@ -8,16 +8,16 @@ const TruckSchema = new mongoose.Schema({
   type: { 
     type: String, 
     required: true, 
-    enum: ['Dry Van', 'Reefer', 'Flat Bed', 'Step Deck', 'FTL', 'LTL'] 
+    enum: ['Dry Van', 'Reefer', 'Flat Bed', 'Full Truckload', 'Stepdeck'] 
   },
   size: {
     type: Number,
     required: function() {
-      return ['Reefer', 'Flat Bed', 'FTL'].includes(this.type); // Size required for these types
+      return ['Dry Van', 'Reefer', 'Flat Bed', 'Full Truckload', 'Stepdeck'].includes(this.type); // Size required for these types
     },
     enum: {
       values: [28, 32, 36, 40, 42, 43, 48, 53],
-      message: 'Size must be one of: 28, 32, 36, 40, 42, 43, 48, 53 ft'
+      message: 'Size must be one of: 28, 32, 36, 40, 42, 43, 45, 48, 53 ft'
     }
   },
   rate: { 

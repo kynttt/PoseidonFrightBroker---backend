@@ -8,7 +8,11 @@ const UserSchema = new mongoose.Schema({
   address: { type: String, required: true },
   postalCode: { type: String, required: true },
   companyName: { type: String, default: '' },
-  isAdmin: { type: Boolean, default: false }, // Ensure isAdmin field is defined
+  role: { 
+    type: String, 
+    enum: ['admin', 'dispatcher', 'accountant', 'lawyer', 'management', 'user'],
+    default: 'user' // Default role can be set to one of the roles
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

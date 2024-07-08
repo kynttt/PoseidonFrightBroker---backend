@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 exports.register = async (req, res) => {
-  const { name, email, password, phone, address, postalCode, companyName, isAdmin } = req.body;
+  const { name, email, password, phone, address, postalCode, companyName, role } = req.body;
 
   try {
     // Validate required fields
@@ -26,7 +26,7 @@ exports.register = async (req, res) => {
       address,
       postalCode,
       companyName: companyName || '', // Set default if not provided
-      isAdmin: isAdmin || false, // Set isAdmin based on request or default to false
+      role: role || 'user', // Set role based on request or default to 'management'
     });
 
     // Hash the password
@@ -37,7 +37,7 @@ exports.register = async (req, res) => {
     await user.save();
 
     // Generate JWT token
-    const payload = { user: { id: user.id, isAdmin: user.isAdmin } };
+    const payload = { user: { id: user.id, role: user.role } };
     jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
       if (err) throw err;
       res.json({ token });
@@ -47,7 +47,6 @@ exports.register = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
-
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
@@ -63,13 +62,7 @@ exports.login = async (req, res) => {
       return res.status(400).json({ msg: 'Invalid Credentials' });
     }
 
-    // Log the user data
-    console.log('User found during login:', user);
-
-    const payload = { user: { id: user.id, isAdmin: user.isAdmin } };
-
-    // Log the payload being used for token generation
-    console.log('Payload for JWT:', payload);
+    const payload = { user: { id: user.id, role: user.role } };
 
     jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
       if (err) throw err;
@@ -81,11 +74,8 @@ exports.login = async (req, res) => {
   }
 };
 
-
 // Get all users
 exports.getUsers = async (req, res) => {
-  console.log('Request User:', req.user);
-  
   try {
     const users = await User.find();
     res.json(users);
@@ -95,54 +85,52 @@ exports.getUsers = async (req, res) => {
   }
 };
 
-
-//get one User
+// Get one user
 exports.getUser = async (req, res) => {
-    try {
-      const user = await User.findById(req.params.id);
-      if (!user) {
-        return res.status(404).json({ msg: 'User not found' });
-      }
-      res.json(user);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server Error');
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
     }
-  };
+    res.json(user);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
 
-//update User
+// Update user
 exports.updateUser = async (req, res) => {
-    const { name, email, phone } = req.body;
-  
-    const userFields = { name, email, phone };
-  
-    try {
-      let user = await User.findById(req.params.id);
-      if (!user) {
-        return res.status(404).json({ msg: 'User not found' });
-      }
-  
-      user = await User.findByIdAndUpdate(req.params.id, { $set: userFields }, { new: true });
-      res.json(user);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server Error');
-    }
-  };
+  const { name, email, phone, role } = req.body;
 
-//Delete User
-exports.deleteUser = async (req, res) => {
-    try {
-      let user = await User.findById(req.params.id);
-      if (!user) {
-        return res.status(404).json({ msg: 'User not found' });
-      }
-  
-      await User.findByIdAndDelete(req.params.id);
-      res.json({ msg: 'User removed' });
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server Error');
+  const userFields = { name, email, phone, role };
+
+  try {
+    let user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
     }
-  };
-  
+
+    user = await User.findByIdAndUpdate(req.params.id, { $set: userFields }, { new: true });
+    res.json(user);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+// Delete user
+exports.deleteUser = async (req, res) => {
+  try {
+    let user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ msg: 'User removed' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};

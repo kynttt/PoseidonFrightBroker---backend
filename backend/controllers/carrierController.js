@@ -1,7 +1,19 @@
 const Carrier = require('../models/Carrier');
 
-// Get all carriers
-exports.getAllCarriers = async (req, res) => {
+exports.createCarrier = async (req, res) => {
+  const { name, contact, address } = req.body;
+
+  try {
+    const carrier = new Carrier({ name, contact, address });
+    await carrier.save();
+    res.json(carrier);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+exports.getCarriers = async (req, res) => {
   try {
     const carriers = await Carrier.find();
     res.json(carriers);
@@ -11,8 +23,7 @@ exports.getAllCarriers = async (req, res) => {
   }
 };
 
-// Get carrier by ID
-exports.getCarrierById = async (req, res) => {
+exports.getCarrier = async (req, res) => {
   try {
     const carrier = await Carrier.findById(req.params.id);
     if (!carrier) {
@@ -25,58 +36,33 @@ exports.getCarrierById = async (req, res) => {
   }
 };
 
-// Create a new carrier
-exports.createCarrier = async (req, res) => {
-  const { companyName, contactNumber, address } = req.body;
-
-  try {
-    const newCarrier = new Carrier({
-      companyName,
-      contactNumber,
-      address
-    });
-
-    await newCarrier.save();
-    res.json(newCarrier);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
-  }
-};
-
-// Update an existing carrier
 exports.updateCarrier = async (req, res) => {
-  const { companyName, contactNumber, address } = req.body;
+  const { name, contact, address } = req.body;
+
+  const carrierFields = { name, contact, address };
 
   try {
-    let updatedCarrier = await Carrier.findById(req.params.id);
-
-    if (!updatedCarrier) {
-      return res.status(404).json({ msg: 'Carrier not found' });
-    }
-
-    updatedCarrier.companyName = companyName;
-    updatedCarrier.contactNumber = contactNumber;
-    updatedCarrier.address = address;
-
-    await updatedCarrier.save();
-    res.json(updatedCarrier);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
-  }
-};
-
-// Delete a carrier
-exports.deleteCarrier = async (req, res) => {
-  try {
-    const carrier = await Carrier.findById(req.params.id);
-
+    let carrier = await Carrier.findById(req.params.id);
     if (!carrier) {
       return res.status(404).json({ msg: 'Carrier not found' });
     }
 
-    await carrier.deleteOne();
+    carrier = await Carrier.findByIdAndUpdate(req.params.id, { $set: carrierFields }, { new: true });
+    res.json(carrier);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+exports.deleteCarrier = async (req, res) => {
+  try {
+    let carrier = await Carrier.findById(req.params.id);
+    if (!carrier) {
+      return res.status(404).json({ msg: 'Carrier not found' });
+    }
+
+    await Carrier.findByIdAndDelete(req.params.id);
     res.json({ msg: 'Carrier removed' });
   } catch (err) {
     console.error(err.message);

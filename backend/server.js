@@ -1,13 +1,11 @@
 const express = require('express');
 const helmet = require('helmet');
 const userRoutes = require('./routes/userRoutes');
-const truckRoutes = require('./routes/trucks');
-const bookingRoutes = require('./routes/bookingRoutes');
-const addressRoutes = require('./routes/addressRoutes');
-const carrierRoutes = require('./routes/carrierRoutes');
-const shipperRoutes = require('./routes/shipperRoutes');
-const freightQuoteRoutes = require('./routes/freightQuoteRoutes');
-const shipmentRoutes = require('./routes/shipmentRoutes');
+// const truckRoutes = require('./routes/trucks');
+// const bookingRoutes = require('./routes/bookingRoutes');
+// const carrierRoutes = require('./routes/carrierRoutes');
+const freightQuoteRoutes = require('./routes/quoteRoutes');
+// const shipmentRoutes = require('./routes/shipmentRoutes');
 const cors = require('cors');
 
 
@@ -45,13 +43,11 @@ app.use(helmet());
 
 // Routes
 app.use('/api/users', userRoutes);
-app.use('/api/trucks', truckRoutes);
-app.use('/api/bookings', bookingRoutes);
-app.use('/api/addresses', addressRoutes);
-app.use('/api/carriers', carrierRoutes);
-app.use('/api/shippers', shipperRoutes);
-app.use('/api/freight-quotes', freightQuoteRoutes);
-app.use('/api/shipments', shipmentRoutes);
+// app.use('/api/trucks', truckRoutes);
+// app.use('/api/bookings', bookingRoutes);
+// app.use('/api/carriers', carrierRoutes);
+app.use('/api/quotes', freightQuoteRoutes);
+// app.use('/api/shipments', shipmentRoutes);
 
 // Error handling middleware
 // Improved error handling middleware
