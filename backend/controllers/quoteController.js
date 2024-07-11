@@ -1,11 +1,17 @@
 const Quote = require('../models/Quote');
+const { validationResult } = require('express-validator');
 
 // @desc    Get all quotes
 // @route   GET /api/quotes
-// @access  Admin only
+// @access  Admin only (or user's own quotes)
 const getQuotes = async (req, res) => {
     try {
-        const quotes = await Quote.find();
+        let quotes;
+        if (req.user.role === 'admin') {
+            quotes = await Quote.find().populate('createdBy', 'name email');
+        } else {
+            quotes = await Quote.find({ createdBy: req.user._id }).populate('createdBy', 'name email');
+        }
         res.status(200).json(quotes);
     } catch (err) {
         res.status(500).json({ message: 'Error fetching quotes', error: err.message });
@@ -14,14 +20,17 @@ const getQuotes = async (req, res) => {
 
 // @desc    Get a quote by ID
 // @route   GET /api/quotes/:id
-// @access  Admin only
+// @access  Admin only (or user's own quote)
 const getQuote = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const quote = await Quote.findById(id);
+        const quote = await Quote.findById(id).populate('createdBy', 'name email');
         if (!quote) {
             return res.status(404).json({ message: 'Quote not found' });
+        }
+        if (req.user.role !== 'admin' && quote.createdBy._id.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Access forbidden' });
         }
         res.status(200).json(quote);
     } catch (err) {
@@ -33,58 +42,83 @@ const getQuote = async (req, res) => {
 // @route   POST /api/quotes
 // @access  Public (for now, adjust as needed)
 const createQuote = async (req, res) => {
-    const { origin, destination, pickupDate, trailerType, trailerSize, commodity, maxWeight, companyName, distance, price } = req.body;
-
-    try {
-        const newQuote = new Quote({
-            origin,
-            destination,
-            pickupDate,
-            trailerType,
-            trailerSize,
-            commodity,
-            maxWeight,
-            companyName,
-            distance,
-            price,
-        });
-
-        const savedQuote = await newQuote.save();
-        res.status(201).json(savedQuote);
-    } catch (err) {
-        res.status(500).json({ message: 'Error creating quote', error: err.message });
+    // Validate request body
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
-};
+  
+    // Destructure required fields from request body
+    const {
+      origin,
+      destination,
+      pickupDate,
+      trailerType,
+      trailerSize,
+      commodity,
+      maxWeight,
+      companyName,
+      distance,
+      price,
+    } = req.body;
+  
+    try {
+      // Create new quote object
+      const newQuote = new Quote({
+        origin,
+        destination,
+        pickupDate,
+        trailerType,
+        trailerSize,
+        commodity,
+        maxWeight,
+        companyName,
+        distance,
+        price,
+        createdBy: req.user.id, // Set createdBy field to authenticated user's ID
+      });
+  
+      // Save quote to database
+      const savedQuote = await newQuote.save();
+  
+      // Return success response
+      res.status(201).json(savedQuote);
+    } catch (error) {
+      console.error('Error creating quote:', error.message);
+      res.status(500).json({ message: 'Error creating quote', error: error.message });
+    }
+  };
+
 
 // @desc    Update a quote by ID
 // @route   PUT /api/quotes/:id
-// @access  Admin only
+// @access  Admin only (or user's own quote)
 const updateQuote = async (req, res) => {
     const { id } = req.params;
     const { origin, destination, pickupDate, trailerType, trailerSize, commodity, maxWeight, companyName, distance, price } = req.body;
 
     try {
-        const updatedQuote = await Quote.findByIdAndUpdate(
-            id,
-            {
-                origin,
-                destination,
-                pickupDate,
-                trailerType,
-                trailerSize,
-                commodity,
-                maxWeight,
-                companyName,
-                distance,
-                price,
-            },
-            { new: true }
-        );
-
-        if (!updatedQuote) {
+        const quote = await Quote.findById(id);
+        if (!quote) {
             return res.status(404).json({ message: 'Quote not found' });
         }
+        if (req.user.role !== 'admin' && quote.createdBy._id.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Access forbidden' });
+        }
 
+        quote.origin = origin;
+        quote.destination = destination;
+        quote.pickupDate = pickupDate;
+        quote.trailerType = trailerType;
+        quote.trailerSize = trailerSize;
+        quote.commodity = commodity;
+        quote.maxWeight = maxWeight;
+        quote.companyName = companyName;
+        quote.distance = distance;
+        quote.price = price;
+        quote.updatedAt = Date.now();
+
+        const updatedQuote = await quote.save();
         res.status(200).json(updatedQuote);
     } catch (err) {
         res.status(500).json({ message: 'Error updating quote', error: err.message });
@@ -93,17 +127,20 @@ const updateQuote = async (req, res) => {
 
 // @desc    Delete a quote by ID
 // @route   DELETE /api/quotes/:id
-// @access  Admin only
+// @access  Admin only (or user's own quote)
 const deleteQuote = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const deletedQuote = await Quote.findByIdAndDelete(id);
-
-        if (!deletedQuote) {
+        const quote = await Quote.findById(id);
+        if (!quote) {
             return res.status(404).json({ message: 'Quote not found' });
         }
+        if (req.user.role !== 'admin' && quote.createdBy._id.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Access forbidden' });
+        }
 
+        await quote.remove();
         res.status(200).json({ message: 'Quote deleted' });
     } catch (err) {
         res.status(500).json({ message: 'Error deleting quote', error: err.message });
