@@ -8,6 +8,11 @@ const { authenticateJWT, authorizeRoles, errorHandler } = require('../middleware
 // Middleware to authenticate all routes below
 router.use(authenticateJWT);
 
+// @route   DELETE /api/quotes/deleteAll
+// @desc    Delete all quotes
+// @access  Admin only
+router.delete('/deleteAll', authorizeRoles('admin'), quoteController.deleteAllQuotes);
+
 // @route   GET /api/quotes
 // @desc    Get all quotes
 // @access  Admin only
@@ -32,6 +37,8 @@ router.put('/:id', authorizeRoles('admin'), quoteController.updateQuote);
 // @desc    Delete a quote by ID
 // @access  Admin only
 router.delete('/:id', authorizeRoles('admin'), quoteController.deleteQuote);
+
+
 
 // Error handling middleware
 router.use(errorHandler);

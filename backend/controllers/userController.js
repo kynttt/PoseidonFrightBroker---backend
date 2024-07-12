@@ -111,6 +111,14 @@ exports.updateUser = async (req, res) => {
       return res.status(404).json({ msg: 'User not found' });
     }
 
+    // Ensure email is unique
+    if (email) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser && existingUser.id !== req.params.id) {
+        return res.status(400).json({ msg: 'Email already in use' });
+      }
+    }
+
     user = await User.findByIdAndUpdate(req.params.id, { $set: userFields }, { new: true });
     res.json(user);
   } catch (err) {
@@ -118,6 +126,7 @@ exports.updateUser = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+
 
 // Delete user
 exports.deleteUser = async (req, res) => {

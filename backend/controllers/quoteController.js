@@ -140,12 +140,30 @@ const deleteQuote = async (req, res) => {
             return res.status(403).json({ message: 'Access forbidden' });
         }
 
-        await quote.remove();
+        await Quote.findByIdAndDelete(id);
         res.status(200).json({ message: 'Quote deleted' });
     } catch (err) {
         res.status(500).json({ message: 'Error deleting quote', error: err.message });
     }
 };
+
+
+// @desc    Delete all quotes
+// @route   DELETE /api/quotes/deleteAll
+// @access  Admin only
+const deleteAllQuotes = async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Access forbidden' });
+    }
+
+    try {
+        await Quote.deleteMany();
+        res.status(200).json({ message: 'All quotes deleted' });
+    } catch (err) {
+        res.status(500).json({ message: 'Error deleting all quotes', error: err.message });
+    }
+};
+
 
 module.exports = {
     getQuotes,
@@ -153,4 +171,5 @@ module.exports = {
     createQuote,
     updateQuote,
     deleteQuote,
+    deleteAllQuotes,
 };
