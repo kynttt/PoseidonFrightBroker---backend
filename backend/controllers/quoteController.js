@@ -35,6 +35,19 @@ const getQuotes = async (req, res) => {
     }
 };
 
+// @desc    Get all quotes by authenticated user
+// @route   GET /api/quotes/user
+// @access  Public (for now, adjust as needed)
+const getUserQuotes = async (req, res) => {
+    try {
+        const quotes = await Quote.find({ createdBy: req.user.id }).populate('createdBy', 'name email');
+        res.status(200).json(quotes);
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching user quotes', error: err.message });
+    }
+};
+
+
 // @desc    Get a quote by ID
 // @route   GET /api/quotes/:id
 // @access  Admin only (or user's own quote)
@@ -175,4 +188,5 @@ module.exports = {
     updateQuote,
     deleteQuote,
     deleteAllQuotes,
+    getUserQuotes,
 };

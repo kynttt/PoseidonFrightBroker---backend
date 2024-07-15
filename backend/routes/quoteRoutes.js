@@ -18,6 +18,11 @@ router.delete('/deleteAll', authorizeRoles('admin'), quoteController.deleteAllQu
 // @access  Admin only
 router.get('/', authorizeRoles('admin'), quoteController.getQuotes);
 
+// @route   GET /api/quotes/user
+// @desc    Get all quotes by authenticated user
+// @access  Public (for now, adjust as needed)
+router.get('/user', quoteController.getUserQuotes);
+
 // @route   GET /api/quotes/:id
 // @desc    Get a quote by ID
 // @access  Admin only
