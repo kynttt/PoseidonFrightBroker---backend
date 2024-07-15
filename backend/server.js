@@ -2,7 +2,7 @@ const express = require('express');
 const helmet = require('helmet');
 const userRoutes = require('./routes/userRoutes');
 // const truckRoutes = require('./routes/trucks');
-// const bookingRoutes = require('./routes/bookingRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
 // const carrierRoutes = require('./routes/carrierRoutes');
 const freightQuoteRoutes = require('./routes/quoteRoutes');
 // const shipmentRoutes = require('./routes/shipmentRoutes');
@@ -44,7 +44,7 @@ app.use(helmet());
 // Routes
 app.use('/api/users', userRoutes);
 // app.use('/api/trucks', truckRoutes);
-// app.use('/api/bookings', bookingRoutes);
+app.use('/api/bookings', bookingRoutes);
 // app.use('/api/carriers', carrierRoutes);
 app.use('/api/quotes', freightQuoteRoutes);
 // app.use('/api/shipments', shipmentRoutes);

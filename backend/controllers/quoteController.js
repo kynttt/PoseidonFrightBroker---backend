@@ -1,6 +1,23 @@
 const Quote = require('../models/Quote');
 const { validationResult } = require('express-validator');
 
+
+// @desc    Delete all quotes
+// @route   DELETE /api/quotes/deleteAll
+// @access  Admin only
+const deleteAllQuotes = async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Access forbidden' });
+    }
+
+    try {
+        await Quote.deleteMany();
+        res.status(200).json({ message: 'All quotes deleted' });
+    } catch (err) {
+        res.status(500).json({ message: 'Error deleting all quotes', error: err.message });
+    }
+};
+
 // @desc    Get all quotes
 // @route   GET /api/quotes
 // @access  Admin only (or user's own quotes)
@@ -148,21 +165,7 @@ const deleteQuote = async (req, res) => {
 };
 
 
-// @desc    Delete all quotes
-// @route   DELETE /api/quotes/deleteAll
-// @access  Admin only
-const deleteAllQuotes = async (req, res) => {
-    if (req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Access forbidden' });
-    }
 
-    try {
-        await Quote.deleteMany();
-        res.status(200).json({ message: 'All quotes deleted' });
-    } catch (err) {
-        res.status(500).json({ message: 'Error deleting all quotes', error: err.message });
-    }
-};
 
 
 module.exports = {
