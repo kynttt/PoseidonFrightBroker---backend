@@ -70,9 +70,9 @@ exports.updateBooking = async (req, res) => {
 
     booking = await Booking.findByIdAndUpdate(req.params.id, { $set: bookingFields }, { new: true })
       .populate('quote')
-      .populate('truck')
+      // .populate('truck')
       .populate('createdBy')
-      .populate('carrier');
+      // .populate('carrier');
     res.json(booking);
   } catch (err) {
     console.error(err.message);
