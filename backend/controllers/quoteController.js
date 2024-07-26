@@ -55,18 +55,38 @@ const getQuote = async (req, res) => {
     const { id } = req.params;
 
     try {
+        console.log('Fetching quote with ID:', id);
         const quote = await Quote.findById(id).populate('createdBy', 'name email');
+        console.log('Quote:', quote);
+
         if (!quote) {
             return res.status(404).json({ message: 'Quote not found' });
         }
-        if (req.user.role !== 'admin' && quote.createdBy._id.toString() !== req.user._id.toString()) {
+
+        // Ensure createdBy is populated and _id exists
+        if (!quote.createdBy || !quote.createdBy._id) {
+            console.log('createdBy is missing or does not have _id');
+            return res.status(500).json({ message: 'Error: createdBy field is missing or _id is not available' });
+        }
+
+        // Safely convert _id to string
+        const createdById = quote.createdBy._id.toString();
+        const requestUserId = req.user.id;  // Assuming req.user.id is the correct user id field
+
+        // Perform the authorization check
+        if (req.user.role !== 'admin' && createdById !== requestUserId) {
             return res.status(403).json({ message: 'Access forbidden' });
         }
+
         res.status(200).json(quote);
     } catch (err) {
+        console.error('Error:', err);
         res.status(500).json({ message: 'Error fetching quote', error: err.message });
     }
 };
+
+
+
 
 // @desc    Create a new quote
 // @route   POST /api/quotes

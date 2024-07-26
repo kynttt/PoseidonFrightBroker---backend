@@ -26,7 +26,7 @@ router.get('/user', quoteController.getUserQuotes);
 // @route   GET /api/quotes/:id
 // @desc    Get a quote by ID
 // @access  Admin only
-router.get('/:id', authorizeRoles('admin'), quoteController.getQuote);
+router.get('/:id',  quoteController.getQuote);
 
 // @route   POST /api/quotes
 // @desc    Create a new quote

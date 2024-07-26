@@ -4,6 +4,7 @@ const QuoteSchema = new mongoose.Schema({
   origin: { type: String, required: true },
   destination: { type: String, required: true },
   pickupDate: { type: Date, required: true },
+  deliveryDate: { type: Date },  // Added field
   trailerType: { type: String, required: true },
   trailerSize: { type: Number, required: true },
   commodity: { type: String, required: true },
