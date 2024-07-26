@@ -14,7 +14,7 @@ router.put('/:id', authorizeRoles('admin'), invoiceController.updateInvoice);
 router.delete('/:id', authorizeRoles('admin'), invoiceController.deleteInvoice);
 // Get invoices by user
 router.get('/user/:userId', invoiceController.getInvoicesByUser);
-
+    
 // Error handling middleware
 router.use(errorHandler);
 
