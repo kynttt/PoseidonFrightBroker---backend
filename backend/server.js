@@ -6,6 +6,7 @@ const bookingRoutes = require('./routes/bookingRoutes');
 // const carrierRoutes = require('./routes/carrierRoutes');
 const freightQuoteRoutes = require('./routes/quoteRoutes');
 // const shipmentRoutes = require('./routes/shipmentRoutes');
+const invoiceRoutes = require('./routes/invoiceRoutes');
 const cors = require('cors');
 
 
@@ -47,7 +48,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/bookings', bookingRoutes);
 // app.use('/api/carriers', carrierRoutes);
 app.use('/api/quotes', freightQuoteRoutes);
-// app.use('/api/shipments', shipmentRoutes);
+// app.use('/api/shipments', shipmentRoutes)
+app.use('/api/invoices', invoiceRoutes);;
 
 // Error handling middleware
 // Improved error handling middleware
