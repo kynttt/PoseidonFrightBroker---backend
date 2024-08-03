@@ -11,7 +11,7 @@ router.post('/login', userController.login);
 router.use(authenticateJWT); // Middleware to authenticate all routes below
 
 router.get('/users', authorizeRoles('admin'), userController.getUsers);
-router.get('/:id', authorizeRoles('admin'), userController.getUser);
+router.get('/:id', userController.getUser);
 router.put('/:id', authorizeRoles('admin'), userController.updateUser);
 router.delete('/:id', authorizeRoles('admin'), userController.deleteUser);
 
